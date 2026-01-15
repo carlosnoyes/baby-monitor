@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import logging
+import math
 from typing import Iterable
 
 from backend.config import settings
@@ -87,13 +88,16 @@ def evaluate_notifications(state: CryState) -> list[int]:
     """
     Return list of user_ids that were notified.
     """
-    if not state.is_crying:
+    if not state.current_minute_is_crying:
         return []
 
     now = _now()
     notified: list[int] = []
     for candidate in _load_candidates():
-        if state.duration_seconds < candidate.threshold_seconds:
+        threshold_minutes = int(math.ceil(candidate.threshold_seconds / 60))
+        if threshold_minutes == 0:
+            pass
+        elif state.effective_cry_minutes < threshold_minutes:
             continue
         if not _cooldown_ok(candidate, now):
             continue
@@ -106,10 +110,10 @@ def evaluate_notifications(state: CryState) -> list[int]:
 def _send_notification(candidate: NotificationCandidate, state: CryState) -> None:
     if not settings.fcm_enabled:
         logger.info(
-            "Notify user %s (%s): crying for %ss",
+            "Notify user %s (%s): crying for %sm",
             candidate.user_id,
             candidate.email,
-            state.duration_seconds,
+            state.effective_cry_minutes,
         )
         return
 
@@ -120,7 +124,7 @@ def _send_notification(candidate: NotificationCandidate, state: CryState) -> Non
         return
 
     title = "Baby is crying"
-    body = f"Crying for {state.duration_seconds} seconds."
+    body = f"Crying for {state.effective_cry_minutes} minutes."
     tokens = query_all("SELECT token FROM device_tokens WHERE user_id = ?", (candidate.user_id,))
     if not tokens:
         logger.warning("No device tokens for user %s", candidate.user_id)

@@ -10,7 +10,7 @@ from threading import Thread
 import logging
 from typing import Callable, Any
 
-from flask import Flask
+from flask import Flask, send_from_directory
 
 from backend.config import settings, ensure_runtime_dirs
 from pathlib import Path
@@ -46,13 +46,16 @@ def register_routes(app: Flask) -> None:
 
 def _build_audio_callback() -> Callable[[bytes], None]:
     def on_audio_chunk(audio_chunk: bytes) -> None:
-        from backend.audio.detector import is_crying
+        from backend.audio.detector import analyze_chunk
         from backend.audio.state import update
         from backend.notifications.dispatcher import evaluate_notifications
 
-        crying = is_crying(audio_chunk)
-        state = update(crying)
-        evaluate_notifications(state)
+        try:
+            crying, level = analyze_chunk(audio_chunk)
+            state = update(crying, volume=level, threshold=settings.audio_volume_threshold)
+            evaluate_notifications(state)
+        except Exception as exc:
+            logger.error("Audio processing failed: %s", exc)
 
     return on_audio_chunk
 
@@ -75,6 +78,14 @@ def create_app() -> Flask:
 
     web_root = Path(__file__).resolve().parents[1] / settings.web_dir
     app = Flask(__name__, static_folder=str(web_root) if settings.serve_web else None)
+    if settings.serve_web:
+        @app.get("/")
+        def index() -> object:
+            return send_from_directory(str(web_root), "dashboard.html")
+
+        @app.get("/<path:filename>")
+        def static_files(filename: str) -> object:
+            return send_from_directory(str(web_root), filename)
 
     _try_call("backend.database", "init_db")
     register_routes(app)

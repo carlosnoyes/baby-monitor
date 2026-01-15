@@ -17,8 +17,18 @@ def register_routes(app: Flask) -> None:
         state = get_state()
         payload = {
             "is_crying": state.is_crying,
-            "started_at": state.started_at.isoformat() if state.started_at else None,
-            "duration_seconds": state.duration_seconds,
+            "current_minute_is_crying": state.current_minute_is_crying,
+            "effective_cry_minutes": state.effective_cry_minutes,
+            "consecutive_quiet_minutes": state.consecutive_quiet_minutes,
+            "volume_level": state.last_volume,
+            "volume_threshold": state.volume_threshold,
+            "timeline": [
+                {
+                    "minute_start": event.minute_start.isoformat(),
+                    "is_crying": event.is_crying,
+                }
+                for event in state.timeline
+            ],
             "last_updated_at": state.last_updated_at.isoformat(),
         }
         return jsonify(payload), 200

@@ -7,7 +7,7 @@ Simple audio detector (volume threshold). Replace with ML later.
 from __future__ import annotations
 
 from array import array
-from typing import Iterable
+from typing import Iterable, Tuple
 
 from backend.config import settings
 
@@ -24,15 +24,15 @@ def _rms_from_int16(samples: Iterable[int]) -> float:
     return mean_square ** 0.5
 
 
-def is_crying(audio_chunk: bytes | Iterable[int]) -> bool:
+def analyze_chunk(audio_chunk: bytes | Iterable[int]) -> Tuple[bool, float]:
     """
-    Return True if the audio chunk likely contains crying.
+    Return (is_crying, normalized_level) for the audio chunk.
 
     Expects 16-bit PCM mono audio for bytes input.
     """
     if isinstance(audio_chunk, (bytes, bytearray, memoryview)):
         if len(audio_chunk) < 2:
-            return False
+            return False, 0.0
         samples = array("h")
         samples.frombytes(bytes(audio_chunk))
         rms = _rms_from_int16(samples)
@@ -41,4 +41,9 @@ def is_crying(audio_chunk: bytes | Iterable[int]) -> bool:
         rms = _rms_from_int16(audio_chunk)
         normalized = rms / 32768.0
 
-    return normalized >= settings.audio_volume_threshold
+    return normalized >= settings.audio_volume_threshold, normalized
+
+
+def is_crying(audio_chunk: bytes | Iterable[int]) -> bool:
+    crying, _level = analyze_chunk(audio_chunk)
+    return crying

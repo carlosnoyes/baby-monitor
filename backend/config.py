@@ -102,7 +102,7 @@ class Settings:
 
     # Volume threshold used by a simple detector (can improve later)
     # This is intentionally a tunable knob.
-    audio_volume_threshold: float = 0.03
+    audio_volume_threshold: float = 0.01
 
     # --- Notification behavior ---
     # Prevent spamming a user repeatedly while the baby is continuously crying.
@@ -154,7 +154,7 @@ def load_settings() -> Settings:
         audio_sample_rate=_env_int("AUDIO_SAMPLE_RATE", 44100),
         audio_channels=_env_int("AUDIO_CHANNELS", 1),
         audio_chunk_seconds=_env_float("AUDIO_CHUNK_SECONDS", 0.5),
-        audio_volume_threshold=_env_float("AUDIO_VOLUME_THRESHOLD", 0.03),
+        audio_volume_threshold=_env_float("AUDIO_VOLUME_THRESHOLD", 0.01),
 
         # Notifications
         notify_cooldown_seconds=_env_int("NOTIFY_COOLDOWN_SECONDS", 60),

@@ -23,10 +23,26 @@ const API = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error("login failed");
+      const message = data.error || "login failed";
+      throw new Error(message);
     }
-    return response.json();
+    return data;
+  },
+
+  async register(email, password) {
+    const response = await fetch("/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const message = data.error || "register failed";
+      throw new Error(message);
+    }
+    return data;
   },
 
   async getSettings() {

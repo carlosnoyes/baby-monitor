@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Baby Monitor | Login</title>
+    <title>Baby Monitor | Push Alerts</title>
     <style>
       :root {
         --bg-1: #fff4e6;
@@ -28,7 +28,6 @@
         background: radial-gradient(1200px 600px at 10% -10%, #fffdf9 0%, transparent 60%),
           linear-gradient(120deg, var(--bg-1), var(--bg-2) 50%, var(--bg-3));
         min-height: 100vh;
-        padding: 24px;
       }
 
       .noise {
@@ -43,6 +42,7 @@
       .wrapper {
         max-width: 900px;
         margin: 0 auto;
+        padding: 40px 24px 64px;
       }
 
       .nav {
@@ -101,89 +101,15 @@
       }
 
       .card {
-        width: min(440px, 100%);
         background: var(--card);
-        border-radius: 28px;
-        padding: 32px;
+        border-radius: 24px;
+        padding: 24px;
         box-shadow: var(--shadow);
-        position: relative;
-        overflow: hidden;
-        margin: 0 auto;
       }
 
-      .card::after {
-        content: "";
-        position: absolute;
-        width: 180px;
-        height: 180px;
-        right: -40px;
-        top: -40px;
-        background: radial-gradient(circle at center, rgba(46, 196, 182, 0.3), transparent 70%);
-      }
-
-      h1 {
-        margin: 0 0 12px;
-        font-size: 2rem;
-      }
-
-      p {
-        margin: 0 0 24px;
+      .note {
         color: var(--ink-soft);
-      }
-
-      form {
-        display: grid;
-        gap: 14px;
-      }
-
-      label {
         font-size: 0.95rem;
-        font-weight: 600;
-      }
-
-      input {
-        width: 100%;
-        padding: 12px 14px;
-        border-radius: 12px;
-        border: 1px solid rgba(27, 26, 23, 0.2);
-        background: #fff;
-        font-size: 1rem;
-      }
-
-      .button {
-        padding: 12px 16px;
-        border-radius: 14px;
-        border: none;
-        background: var(--accent);
-        color: #fff;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: var(--shadow);
-      }
-
-      .button.secondary {
-        background: transparent;
-        border: 2px solid rgba(27, 26, 23, 0.2);
-        color: var(--ink);
-        box-shadow: none;
-      }
-
-      .actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .link {
-        color: var(--ink);
-        text-decoration: none;
-        font-weight: 600;
-      }
-
-      .helper {
-        font-size: 0.9rem;
-        color: var(--ink-soft);
       }
 
       @media (max-width: 720px) {
@@ -215,31 +141,26 @@
         </div>
       </header>
 
-      <div class="card">
-        <h1 id="formTitle">Welcome back</h1>
-        <p id="formSubtitle">Log in to manage push alerts and devices.</p>
-        <div class="actions" style="margin-bottom: 16px;">
-          <button class="button secondary" id="modeLogin" type="button">Log In</button>
-          <button class="button secondary" id="modeRegister" type="button">Create Account</button>
+      <section class="card">
+        <h2>Push Alerts</h2>
+        <p class="note" id="pushMessage">
+          Log in to connect a device and configure push notifications.
+        </p>
+        <div id="pushPlaceholder" style="display: none;">
+          <p class="note">Device registration and push settings coming soon.</p>
         </div>
-        <form id="loginForm">
-          <div>
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" placeholder="you@example.com" required />
-          </div>
-          <div>
-            <label for="password">Password</label>
-            <input id="password" name="password" type="password" placeholder="********" required />
-          </div>
-          <button class="button" type="submit" id="submitButton">Log In</button>
-        </form>
-        <div class="actions">
-          <span class="helper" id="helperText">New here? Create an account to get started.</span>
-          <a class="link" href="dashboard.html">Back to dashboard</a>
-        </div>
-      </div>
+      </section>
     </div>
+
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
+    <script>
+      const message = document.getElementById("pushMessage");
+      const placeholder = document.getElementById("pushPlaceholder");
+      if (window.BM_API && window.BM_API.getToken()) {
+        message.textContent = "Push alerts are enabled for logged-in users.";
+        placeholder.style.display = "block";
+      }
+    </script>
   </body>
 </html>
