@@ -14,6 +14,8 @@ import os
 import time
 from typing import Any
 
+from flask import Request
+
 from backend.config import settings
 
 
@@ -89,3 +91,13 @@ def verify_token(token: str) -> dict[str, Any] | None:
         return None
 
     return body
+
+
+def get_auth_payload(request: Request) -> dict[str, Any] | None:
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return None
+    token = auth_header[7:].strip()
+    if not token:
+        return None
+    return verify_token(token)

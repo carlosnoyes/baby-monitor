@@ -13,6 +13,7 @@ from typing import Callable, Any
 from flask import Flask
 
 from backend.config import settings, ensure_runtime_dirs
+from pathlib import Path
 
 
 logger = logging.getLogger("baby_monitor")
@@ -39,6 +40,7 @@ def register_routes(app: Flask) -> None:
     _try_call("backend.api.status", "register_routes", app)
     _try_call("backend.api.settings", "register_routes", app)
     _try_call("backend.api.users", "register_routes", app)
+    _try_call("backend.api.devices", "register_routes", app)
     _try_call("backend.auth.routes", "register_routes", app)
 
 
@@ -71,7 +73,8 @@ def create_app() -> Flask:
     _configure_logging()
     ensure_runtime_dirs()
 
-    app = Flask(__name__, static_folder=settings.web_dir if settings.serve_web else None)
+    web_root = Path(__file__).resolve().parents[1] / settings.web_dir
+    app = Flask(__name__, static_folder=str(web_root) if settings.serve_web else None)
 
     _try_call("backend.database", "init_db")
     register_routes(app)

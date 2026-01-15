@@ -54,6 +54,16 @@ def init_db() -> None:
             ended_at TEXT,
             duration_seconds INTEGER
         );
+
+        CREATE TABLE IF NOT EXISTS device_tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            token TEXT NOT NULL UNIQUE,
+            platform TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            last_seen_at TEXT,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
         """
     )
     db.commit()

@@ -9,6 +9,7 @@ from __future__ import annotations
 from flask import Flask, jsonify, request, Response
 
 from backend.database import query_one, execute
+from backend.auth.auth_utils import get_auth_payload
 
 
 def _get_user(user_id: int) -> dict | None:
@@ -59,19 +60,35 @@ def _ensure_settings(user_id: int) -> dict:
 def register_routes(app: Flask) -> None:
     @app.get("/api/settings")
     def get_settings() -> tuple[Response, int]:
-        user_id = request.args.get("user_id", type=int)
-        if not user_id:
-            return jsonify({"error": "user_id is required"}), 400
+        payload = get_auth_payload(request)
+        if not payload:
+            return jsonify({"error": "unauthorized"}), 401
+        token_user_id = payload.get("sub")
+        if not isinstance(token_user_id, int):
+            return jsonify({"error": "invalid token"}), 401
+
+        user_id = request.args.get("user_id", type=int) or token_user_id
+        if user_id != token_user_id:
+            return jsonify({"error": "forbidden"}), 403
         if not _get_user(user_id):
             return jsonify({"error": "user not found"}), 404
         return jsonify(_ensure_settings(user_id)), 200
 
     @app.post("/api/settings")
     def update_settings() -> tuple[Response, int]:
+        payload = get_auth_payload(request)
+        if not payload:
+            return jsonify({"error": "unauthorized"}), 401
+        token_user_id = payload.get("sub")
+        if not isinstance(token_user_id, int):
+            return jsonify({"error": "invalid token"}), 401
+
         data = request.get_json(silent=True) or {}
-        user_id = data.get("user_id")
+        user_id = data.get("user_id", token_user_id)
         if not isinstance(user_id, int):
             return jsonify({"error": "user_id is required"}), 400
+        if user_id != token_user_id:
+            return jsonify({"error": "forbidden"}), 403
         if not _get_user(user_id):
             return jsonify({"error": "user not found"}), 404
 

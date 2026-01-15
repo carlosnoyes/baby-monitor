@@ -121,5 +121,9 @@ def _send_notification(candidate: NotificationCandidate, state: CryState) -> Non
 
     title = "Baby is crying"
     body = f"Crying for {state.duration_seconds} seconds."
-    # Token handling is intentionally deferred until user/device registration is added.
-    send_push("", title, body)
+    tokens = query_all("SELECT token FROM device_tokens WHERE user_id = ?", (candidate.user_id,))
+    if not tokens:
+        logger.warning("No device tokens for user %s", candidate.user_id)
+        return
+    for row in tokens:
+        send_push(row["token"], title, body)
