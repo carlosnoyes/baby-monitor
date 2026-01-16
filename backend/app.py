@@ -7,12 +7,15 @@ App entry point for the Baby Monitor backend.
 from __future__ import annotations
 
 from threading import Thread
+from datetime import datetime, timezone
+import time
 import logging
 from typing import Callable, Any
 
 from flask import Flask, send_from_directory
 
 from backend.config import settings, ensure_runtime_dirs
+from backend.database import execute
 from pathlib import Path
 
 
@@ -72,6 +75,23 @@ def start_audio_listener() -> None:
     thread.start()
 
 
+def start_volume_logger() -> None:
+    def volume_loop() -> None:
+        from backend.audio.state import get_state
+
+        while True:
+            state = get_state()
+            timestamp = datetime.now(timezone.utc).isoformat()
+            execute(
+                "INSERT INTO volume_samples (recorded_at, rms) VALUES (?, ?)",
+                (timestamp, float(state.last_volume)),
+            )
+            time.sleep(1)
+
+    thread = Thread(target=volume_loop, daemon=True)
+    thread.start()
+
+
 def create_app() -> Flask:
     _configure_logging()
     ensure_runtime_dirs()
@@ -90,6 +110,7 @@ def create_app() -> Flask:
     _try_call("backend.database", "init_db")
     register_routes(app)
     start_audio_listener()
+    start_volume_logger()
 
     return app
 

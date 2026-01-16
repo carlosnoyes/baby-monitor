@@ -180,14 +180,75 @@
         font-size: 0.85rem;
         color: var(--ink-soft);
         margin-top: 6px;
+        gap: 6px;
+        flex-wrap: wrap;
+        position: relative;
+        height: 20px;
       }
 
       .axis-row .x-label span {
-        min-width: 80px;
+        position: absolute;
+        transform: translateX(-50%);
+        white-space: nowrap;
       }
 
-      .axis-row .x-label span:last-child {
-        text-align: right;
+      .axis-row .x-label span::before {
+        content: "";
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1px;
+        height: 6px;
+        background: rgba(27, 26, 23, 0.3);
+      }
+
+      .axis-row .x-label .tick-label::before {
+        height: 8px;
+      }
+
+      .axis-row .x-label .tick-major::before {
+        height: 8px;
+      }
+
+      .axis-row .x-label .tick-minor::before {
+        height: 4px;
+        opacity: 0.6;
+      }
+
+      .volume-wrap {
+        display: grid;
+        grid-template-columns: 1fr 40px;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .chart-stack {
+        width: 100%;
+      }
+
+      .threshold-slider {
+        height: 140px;
+        writing-mode: bt-lr;
+        -webkit-appearance: slider-vertical;
+        width: 32px;
+      }
+
+      .threshold-label {
+        font-size: 0.8rem;
+        color: var(--ink-soft);
+        transform: rotate(-90deg);
+        transform-origin: center;
+        white-space: nowrap;
+        margin-left: 22px;
+        margin-top: 6px;
+      }
+
+      .incident-wrap {
+        display: grid;
+        grid-template-columns: 1fr 40px;
+        gap: 12px;
+        align-items: center;
       }
 
       .nav-actions {
@@ -209,6 +270,29 @@
       .note {
         font-size: 0.95rem;
         color: var(--ink-soft);
+      }
+
+      .alert-controls {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .alert-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .alert-label {
+        font-weight: 600;
+      }
+
+      .alert-slider {
+        width: 50%;
+        justify-self: end;
+        direction: rtl;
       }
 
       @keyframes pulse {
@@ -257,7 +341,6 @@
         <div class="nav-actions">
           <nav class="nav-links">
             <a href="dashboard.html">Dashboard</a>
-            <a href="alerts.html">Alerts</a>
             <a href="push.html" id="pushLink">Push Alerts</a>
           </nav>
           <a class="nav-button" href="login.html" id="authAction">Log In</a>
@@ -267,18 +350,35 @@
       <section class="grid">
         <div class="card">
           <h2>Live Monitor</h2>
-          <div id="statusCard" class="status">
-            <span class="pulse"></span>
-            <span id="statusText">Listening</span>
+          <div class="alert-controls">
+            <div class="alert-row">
+              <div class="alert-label">
+                Alert me after <span id="alertAfterValue">0</span> min
+              </div>
+              <input id="alertAfter" class="alert-slider" type="range" min="0" max="120" step="5" value="0" />
+            </div>
           </div>
           <div class="chart-label">Volume</div>
           <div class="axis-row">
             <div class="y-label">Volume</div>
             <div>
-              <svg class="chart" id="volumeChart" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
-              <div class="x-label">
-                <span id="volumeTimeStart">15 min ago</span>
-                <span id="volumeTimeEnd">Now</span>
+              <div class="volume-wrap">
+                <div class="chart-stack">
+                  <svg class="chart" id="volumeChart" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
+                  <div class="x-label" id="volumeTicks"></div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                  <input
+                    id="thresholdSlider"
+                    class="threshold-slider"
+                    type="range"
+                    min="0"
+                    max="0.1"
+                    step="0.001"
+                    value="0.01"
+                  />
+                  <div class="threshold-label">Threshold</div>
+                </div>
               </div>
             </div>
           </div>
@@ -287,10 +387,23 @@
           <div class="axis-row">
             <div class="y-label">Incidents</div>
             <div>
-              <svg class="chart" id="incidentChart" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
-              <div class="x-label">
-                <span id="incidentTimeStart">8h ago</span>
-                <span id="incidentTimeEnd">Now</span>
+              <div class="incident-wrap">
+                <div class="chart-stack">
+                  <svg class="chart" id="incidentChart" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
+                  <div class="x-label" id="incidentTicks"></div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                  <input
+                    id="incidentThresholdSlider"
+                    class="threshold-slider"
+                    type="range"
+                    min="0"
+                    max="5"
+                    step="1"
+                    value="1"
+                  />
+                  <div class="threshold-label">Threshold</div>
+                </div>
               </div>
             </div>
           </div>

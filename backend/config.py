@@ -102,7 +102,7 @@ class Settings:
 
     # Volume threshold used by a simple detector (can improve later)
     # This is intentionally a tunable knob.
-    audio_volume_threshold: float = 0.01
+    audio_volume_threshold: float = 0.03
 
     # --- Notification behavior ---
     # Prevent spamming a user repeatedly while the baby is continuously crying.

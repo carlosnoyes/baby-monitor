@@ -55,6 +55,12 @@ def init_db() -> None:
             duration_seconds INTEGER
         );
 
+        CREATE TABLE IF NOT EXISTS volume_samples (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recorded_at TEXT NOT NULL,
+            rms REAL NOT NULL
+        );
+
         CREATE TABLE IF NOT EXISTS device_tokens (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
