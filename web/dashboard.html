@@ -279,9 +279,9 @@
       }
 
       .alert-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: 12px;
       }
 
@@ -289,9 +289,13 @@
         font-weight: 600;
       }
 
-      .alert-slider {
+      .alert-slider-wrap {
         width: 50%;
-        justify-self: end;
+        margin-right: 52px;
+      }
+
+      .alert-slider {
+        width: 100%;
         direction: rtl;
       }
 
@@ -355,7 +359,9 @@
               <div class="alert-label">
                 Alert me after <span id="alertAfterValue">0</span> min
               </div>
-              <input id="alertAfter" class="alert-slider" type="range" min="0" max="120" step="5" value="0" />
+              <div class="alert-slider-wrap">
+                <input id="alertAfter" class="alert-slider" type="range" min="0" max="120" step="5" value="0" />
+              </div>
             </div>
           </div>
           <div class="chart-label">Volume</div>
